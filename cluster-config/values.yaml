@@ -1,0 +1,26 @@
+cluster:
+  # Ingress controller
+  nginx-ingress:
+    controller:
+      scope:
+        enabled: true
+      service:
+        loadBalancerIP: 104.40.15.154
+
+  # Service for TLS certificate renewals
+  acme-cert-renewal:
+    domain: k8s.roramu.com
+    auth-domain: tls.k8s.roramu.com
+    acme-server: https://acme-v02.api.letsencrypt.org/directory
+    email: rohitramu@gmail.com
+    loadBalancerIP: 40.112.193.228
+
+  # Secrets
+  secrets:
+    docker:
+      type: kubernetes.io/dockerconfigjson
+      namespaces: []
+      data:
+        registry: !!null
+        username: !!null
+        password: !!null

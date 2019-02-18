@@ -1,0 +1,14 @@
+{{- $labels := include "cluster.labels" . }}
+{{- $namespaces := .Values.namespaces }}
+{{- range $namespaces }}
+{{- $namespace := . | trim }}
+{{- if ($namespace | ne "default") }}
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: {{ . }}
+  labels: {{ $labels | nindent 4 }}
+
+---
+{{- end }}
+{{- end }}

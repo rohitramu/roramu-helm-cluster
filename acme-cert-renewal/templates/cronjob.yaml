@@ -1,0 +1,48 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "acme-cert-renewal.labels" . | nindent 4 }}
+spec:
+  schedule: !!string {{ .Values.schedule }}
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    metadata:
+      generateName: {{ .Values.name }}-
+      namespace: {{ .Values.namespace }}
+      labels: {{ include "acme-cert-renewal.labels" . | nindent 8 }}
+    spec:
+      template:
+        metadata:
+          generateName: {{ .Values.name }}-
+          namespace: {{ .Values.namespace }}
+          labels: {{ include "acme-cert-renewal.labels" . | nindent 12 }}
+        spec:
+          restartPolicy: OnFailure
+          containers:
+          - name: {{ .Values.name }}
+            image: rohitramu/acme-cert-renewal-k8s:{{ .Values.image.tag }}
+            imagePullPolicy: {{ .Values.image.pullPolicy }}
+            ports:
+            - name: dns-udp
+              containerPort: {{ .Values.image.port }}
+              protocol: UDP
+            - name: dns-tcp
+              containerPort: {{ .Values.image.port }}
+              protocol: TCP
+            env:
+            - name: ACME_SERVER
+              value: !!string {{ index .Values "acme-server" }}
+            - name: DOMAIN
+              value: !!string {{ .Values.domain }}
+            - name: AUTH_DOMAIN
+              value: !!string {{ index .Values "auth-domain" }}
+            - name: CERT_EMAIL
+              value: !!string {{ .Values.email }}
+            - name: SECRET_NAME
+              value: !!string {{ index .Values "secret-name" }}
+            - name: SECRET_NAMESPACE
+              value: !!string {{ index .Values "secret-namespace" }}
+            - name: DEBUG
+              value: !!string {{ .Values.debug }}

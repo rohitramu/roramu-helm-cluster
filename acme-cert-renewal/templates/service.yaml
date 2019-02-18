@@ -1,0 +1,16 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.name }}
+  namespace: {{ .Values.namespace }}
+  labels: {{ include "acme-cert-renewal.labels" . | nindent 4 }}
+spec:
+  type: LoadBalancer
+  externalTrafficPolicy: !!string {{ .Values.externalTrafficPolicy }}
+  loadBalancerIP: !!string {{ .Values.loadBalancerIP }}
+  ports:
+  - name: dns
+    port: 53
+    targetPort: {{ .Values.image.port }}
+    protocol: UDP
+  selector: {{ include "acme-cert-renewal.selectedLabels" . | nindent 4 }}

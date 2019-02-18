@@ -1,0 +1,51 @@
+# Ingress controller
+nginx-ingress:
+  imagePullSecrets:
+  - name: docker
+  rbac:
+    create: false
+  controller:
+    replicaCount: 1
+    scope:
+      enabled: false # set this to true to only allow ingress for services in the namespace specified below
+      namespace: frontend # the namespace which contains all the services that should be exposed by this ingress controller
+    service:
+      externalTrafficPolicy: Local
+      loadBalancerIP: 1.2.3.4 # the static public IP address that ingress routes should be exposed on
+      enableHttp: true
+      enableHttps: true
+    extraArgs:
+      default-ssl-certificate: frontend/tls-secret # namespace and secret name for the default ingress (404) service
+
+# Service for TLS certificate renewals
+acme-cert-renewal:
+  debug: false
+  name: acme-cert-renewal
+  namespace: acme-cert-renewal # the namespace in which the cert renewal resources will be created
+  domain: example.com
+  auth-domain: tls
+  acme-server: https://acme-staging-v02.api.letsencrypt.org/directory
+  email: admin@example.com
+  secret-name: tls-secret
+  secret-namespace: frontend
+  schedule: "0 0,12 * * *" # cron job schedule string to determine the frequency that the certs are checked for expiry
+  image:
+    tag: latest
+  externalTrafficPolicy: Local
+  loadBalancerIP: 5.6.7.8 # the static public IP address that will be used to satisfy the ACME wildcard certificate challenge
+
+# Namespaces
+namespaces:
+- frontend
+- backend
+- acme-cert-renewal
+
+# Secrets
+secrets:
+  docker: # this key is the secret name
+    type: kubernetes.io/dockerconfigjson
+    namespaces: [] # if this is null, not specified, or an empty array, the secret will be placed in all namespaces
+    data:
+      registry: !!null
+      username: !!null
+      password: !!null

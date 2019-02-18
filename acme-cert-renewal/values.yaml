@@ -1,0 +1,44 @@
+# The name of the resources created
+name: acme-cert-renewal
+
+# The namespace that the resources should be created in
+namespace: default
+
+# The domain to get/renew certificates for
+domain: example.com
+
+# The domain to use for the ACME challenge
+auth-domain: tls.example.com
+
+# The ACME server (certificate authority) to use
+acme-server: https://acme-staging-v02.api.letsencrypt.org/directory
+
+# The contact email which will be in the certificate
+email: admin@example.com
+
+# The secret name to store the certificate in
+secret-name: tls-secret
+
+# The namespace in which the secret with the certificate should be created
+secret-namespace: frontend
+
+# Default schedule is to run at 00:00:00 on the 1st and 15th of each month
+schedule: "0 * 1,15 * *"
+
+# Docker image settings
+image:
+    # Which tag of the roramu/acme-cert-renewal-k8s image to use
+    tag: latest
+    # The pull policy to use
+    pullPolicy: Always
+    # The port that is exposed in the running container
+    port: 53
+
+# The external IP to expose the job on (this is where the ACME challenges should be directed to)
+loadBalancerIP: ""
+
+# External traffic policy for the service
+externalTrafficPolicy: ""
+
+# Debug mode
+debug: false
